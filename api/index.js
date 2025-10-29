@@ -42,8 +42,11 @@ const connectDB = async () => {
     
     try {
         await mongoose.connect(MONGODB_URI, {
-            serverSelectionTimeoutMS: 5000,
+            serverSelectionTimeoutMS: 30000,
             socketTimeoutMS: 45000,
+            maxPoolSize: 10,
+            retryWrites: true,
+            w: 'majority'
         });
         isConnected = true;
         console.log('✅ Connected to MongoDB Atlas');
@@ -76,7 +79,7 @@ app.post('/api/trade-fair/leads', async (req, res) => {
     try {
         // Ensure DB connection
         await connectDB();
-        
+
         const { name, email, phone, company, role } = req.body;
 
         // Validation
