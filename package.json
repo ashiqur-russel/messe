@@ -1,0 +1,18 @@
+{
+    "name": "trade-fair-api",
+    "version": "1.0.0",
+    "description": "Standalone Trade Fair API for Vercel",
+    "main": "api/index.js",
+    "scripts": {
+        "dev": "node api/index.js",
+        "start": "node api/index.js"
+    },
+    "dependencies": {
+        "express": "^4.18.2",
+        "mongoose": "^8.0.0",
+        "cors": "^2.8.5"
+    },
+    "engines": {
+        "node": ">=18.x"
+    }
+}
