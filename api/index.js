@@ -32,10 +32,29 @@ const TradeFairLeadSchema = new mongoose.Schema({
 
 const TradeFairLead = mongoose.model('TradeFairLead', TradeFairLeadSchema);
 
-// Connect to MongoDB
-mongoose.connect(MONGODB_URI)
-    .then(() => console.log('✅ Connected to MongoDB Atlas'))
-    .catch((err) => console.error('❌ MongoDB connection error:', err));
+// Connect to MongoDB with better error handling
+let isConnected = false;
+
+const connectDB = async () => {
+    if (isConnected) {
+        return;
+    }
+    
+    try {
+        await mongoose.connect(MONGODB_URI, {
+            serverSelectionTimeoutMS: 5000,
+            socketTimeoutMS: 45000,
+        });
+        isConnected = true;
+        console.log('✅ Connected to MongoDB Atlas');
+    } catch (err) {
+        console.error('❌ MongoDB connection error:', err);
+        throw err;
+    }
+};
+
+// Initial connection
+connectDB().catch(err => console.error('Failed to connect to MongoDB:', err));
 
 // Routes
 
@@ -55,6 +74,9 @@ app.get('/', (req, res) => {
 // POST - Submit new lead
 app.post('/api/trade-fair/leads', async (req, res) => {
     try {
+        // Ensure DB connection
+        await connectDB();
+        
         const { name, email, phone, company, role } = req.body;
 
         // Validation
@@ -106,6 +128,7 @@ app.post('/api/trade-fair/leads', async (req, res) => {
 // GET - Get all leads
 app.get('/api/trade-fair/leads', async (req, res) => {
     try {
+        await connectDB();
         const leads = await TradeFairLead.find().sort({ timestamp: -1 });
         res.json(leads);
     } catch (error) {
@@ -120,6 +143,7 @@ app.get('/api/trade-fair/leads', async (req, res) => {
 // GET - Get leads count
 app.get('/api/trade-fair/leads/count', async (req, res) => {
     try {
+        await connectDB();
         const count = await TradeFairLead.countDocuments();
         res.json({ totalLeads: count });
     } catch (error) {
